@@ -3,4 +3,5 @@ test
 .babelrc
 .eslintrc
 .gitignore
+.travis.yml
 yarn.lock
