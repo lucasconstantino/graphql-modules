@@ -12,5 +12,17 @@
     "module"
   ],
   "author": "Lucas Constantino Silva <lucasconstantinosilva@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "babel-core": "^6.18.2",
+    "babel-preset-taller": "^0.1.1",
+    "babel-register": "^6.18.0",
+    "chai": "^3.5.0",
+    "eslint": "^3.10.2",
+    "eslint-config-taller": "^1.0.4",
+    "mocha": "^3.1.2"
+  },
+  "dependencies": {
+    "extend": "^3.0.0"
+  }
 }
