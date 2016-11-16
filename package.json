@@ -1,0 +1,16 @@
+{
+  "name": "graphql-modules",
+  "version": "0.1.0",
+  "description": "GraphQL module library for Apollo.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "graphql",
+    "apollo",
+    "module"
+  ],
+  "author": "Lucas Constantino Silva <lucasconstantinosilva@gmail.com>",
+  "license": "MIT"
+}
