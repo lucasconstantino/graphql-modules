@@ -6,14 +6,14 @@ chai.use(spies)
 
 const expect = chai.expect
 
-describe('#bundle()', () => {
+describe('bundle', () => {
   describe('types', () => {
     it('should create a type definition', () => {
       const module = {
         schema: `
-        type Test {
-          attr: String
-        }
+          type Test {
+            attr: String
+          }
         `
       }
 
@@ -199,6 +199,41 @@ describe('#bundle()', () => {
 
       expect(module.alter).to.have.been.called.once
       expect(config).to.have.property('extra')
+    })
+  })
+
+  describe('factories', () => {
+    it('should be possible to use factory modules', () => {
+      const factoryModule = () => ({
+        schema: `
+          type Test {
+            attr: String
+          }
+        `
+      })
+
+      const { typeDefs } = bundle([factoryModule])
+      const simplifiedTypeDefs = typeDefs.replace(/[\s]+/g, ' ').trim()
+
+      expect(simplifiedTypeDefs).to.equal('type Test { attr: String } schema { }')
+    })
+  })
+
+  describe('dependencies', () => {
+    it('should be possible to define dependencies', () => {
+      const moduleA = { schema: 'type CustomType { attr: String }' }
+
+      const moduleB = {
+        queries: `
+          customQuery(arg: String): CustomType
+        `,
+        modules: [moduleA]
+      }
+
+      const { typeDefs } = bundle([moduleB])
+      const simplifiedTypeDefs = typeDefs.replace(/[\s]+/g, ' ').trim()
+
+      expect(simplifiedTypeDefs).to.equal('type CustomType { attr: String } type RootQuery { customQuery(arg: String): CustomType } schema { query: RootQuery }')
     })
   })
 })

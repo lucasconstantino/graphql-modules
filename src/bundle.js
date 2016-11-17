@@ -8,7 +8,35 @@ const defaultOptions = {
   }
 }
 
+// Helper to filter empty values.
 const notEmpty = value => !!value
+
+// Helper to flatten a deeply nested array.
+const flatten = (result, subject) => result.concat(Array.isArray(subject) ? subject.reduce(flatten, []) : subject)
+
+const processedModules = []
+
+const processModule = module => {
+  // Recursion security meassure.
+  if (processedModules.indexOf(module) !== -1) return []
+  processedModules.push(module)
+
+  // 1 - Factory format.
+  if (module && module.constructor && module.call && module.apply) {
+    return processModule(module())
+  }
+
+  // 2 - Array of modules format.
+  if (Array.isArray(module)) {
+    return module.map(processModule)
+  }
+
+  // 3 - Available submodules/dependencies.
+  const dependencies = module.modules || []
+  delete module.modules
+
+  return [module].concat(dependencies.map(processModule))
+}
 
 /**
  * Compiles modules into schema definitions and resolvers as expected by Apollo server.
@@ -16,19 +44,23 @@ const notEmpty = value => !!value
  * @todo: Add warning for inconsistent data (e.g. resolver without definition).
  * @todo: Add simplified support for custom scalars.
  *
- * @param {Object} modules An array of modules.
- * @param {String} modules.schema Schema definition string.
- * @param {String} modules.queries Query definition string.
- * @param {String} modules.mutations Mutation definition string.
- * @param {String} modules.subscriptions Subscription definition string.
- * @param {Object} modules.resolvers Resolver definition object.
- * @param {Object} modules.resolvers.queries Query resolver map.
- * @param {Object} modules.resolvers.queries.[key] Query resolver function.
- * @param {Object} modules.resolvers.mutations Mutation resolver map.
- * @param {Object} modules.resolvers.mutations.[key] Mutation resolver function.
- * @param {Object} modules.resolvers.subscriptions Subscription resolver map.
- * @param {Object} modules.resolvers.subscriptions.[key] Subscription resolver function.
- * @param {Function} modules.alter A function to alter the resulting configuration object
+ * @param {Object} modules An array of modules. Each module can be one of the following:
+ *                         1 - An object as described in the other params.
+ *                         2 - An array of the previous option.
+ *                         3 - A factory (function) that returns one of the previous.
+ * @param {Array} modules[].modules An array of submodules/dependencies.
+ * @param {String} modules[].schema Schema definition string.
+ * @param {String} modules[].queries Query definition string.
+ * @param {String} modules[].mutations Mutation definition string.
+ * @param {String} modules[].subscriptions Subscription definition string.
+ * @param {Object} modules[].resolvers Resolver definition object.
+ * @param {Object} modules[].resolvers.queries Query resolver map.
+ * @param {Object} modules[].resolvers.queries.[key] Query resolver function.
+ * @param {Object} modules[].resolvers.mutations Mutation resolver map.
+ * @param {Object} modules[].resolvers.mutations.[key] Mutation resolver function.
+ * @param {Object} modules[].resolvers.subscriptions Subscription resolver map.
+ * @param {Object} modules[].resolvers.subscriptions.[key] Subscription resolver function.
+ * @param {Function} modules[].alter A function to alter the resulting configuration object
  *                                 after it's being created.
  * @param {Object} options An object of options.
  * @param {Object} options.rootKeys A map of root query keys.
@@ -38,8 +70,9 @@ const notEmpty = value => !!value
  *
  * @return {Object} Options as expected by http://dev.apollodata.com/tools/graphql-tools/generate-schema.html#makeExecutableSchema.
  */
-export default (modules, options = {}) => {
+export default (modules = [], options = {}) => {
   options = extend(true, {}, defaultOptions, options)
+  modules = modules.reduce((modules, module) => modules.concat(processModule(module)), []).reduce(flatten, [])
 
   const schema = modules.map(module => module.schema || '').filter(notEmpty).join(`\n`)
 
