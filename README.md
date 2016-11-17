@@ -14,13 +14,64 @@ npm install graphql-modules
 
 > You should consider using [yarn](https://yarnpkg.com/), though.
 
-## Usage
+## Basic usage
 
-Say you have a system with books and authors. You could have a module to define the Books functionality and one for the Authors functionality. Then, you would bundle them up into a single schema using `graphql-modules`. You could end up with something like this:
+```js
+// module-a.js
+// -----------
+const moduleA = {
+  queries: `
+    helloWorld: String
+  `
+  resolvers: {
+    queries: {
+      helloWorld: () => 'Hello World!'
+    }
+  }
+}
+
+export default moduleA
+
+// module-b.js
+// -----------
+const moduleB = {
+  queries: `
+    helloYou(name: String): String
+  `,
+  resolvers: {
+    queries: {
+      helloYou: (root, { name }) => `Hello ${name}!`
+    }
+  }
+}
+
+export default moduleB
+
+// schema.js
+// ---------
+import { bundle } from 'graphql-modules'
+import { makeExecutableSchema } from 'graphql-tools'
+
+import moduleA from './module-a'
+import moduleB from './module-b'
+
+const modules = [moduleA, moduleB]
+
+
+export default makeExecutableSchema(bundle(modules))
+```
+
+## Complex needs
+
+This library handles complex situations such as cyclic dependencies between modules. For that to work, each module can be a factory function - besides being a module object. That allows for dependencies to be handled on runtime, making ES6 module binding work as desired. This is pretty much what is proposed by the [official Apollo docs](http://dev.apollodata.com/tools/graphql-tools/generate-schema.html#modularizing).
+
+Say you have a system with books and authors - two modules that are interdependent; books have authors and authors have books. You could end up with something like this:
 
 <details>
  <summary>`/books.js`</summary>
  ```js
+ import authors from './authors'
+
  const data = [
    { id: 1, title: 'JavaScript: The Good Parts', author: 1 },
    { id: 2, title: 'End to end testing with Protractor', author: 2 }
@@ -48,11 +99,12 @@ Say you have a system with books and authors. You could have a module to define 
    }
  }
 
- export default {
+ export default = () => ({
    schema,
    queries,
    resolvers,
- }
+   modules: [authors]
+ })
  ```
 </details>
 
@@ -61,6 +113,8 @@ In this file, we define a schema, queries, and resolvers. At the end, we export 
 <details>
  <summary>`/authors.js`</summary>
  ```js
+ import books from './books'
+
  const data = [
     { id: 1, name: 'Douglas Crockford' },
     { id: 2, name: 'Walmyr Lima' }
@@ -88,11 +142,12 @@ In this file, we define a schema, queries, and resolvers. At the end, we export 
    }
  }
 
- export default {
+ export default () => ({
    schema,
    queries,
    resolvers,
- }
+   modules: [books]
+ })
  ```
 </details>
 
@@ -105,9 +160,8 @@ This file is almost copy and paste from the previous.
  import { makeExecutableSchema } from 'graphql-tools'
 
  import books from './books'
- import authors from './authors'
 
- const modules = [books, authors]
+ const modules = [books]
 
  export default makeExecutableSchema(bundle(modules))
  ```
