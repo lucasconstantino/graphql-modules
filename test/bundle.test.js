@@ -1,5 +1,10 @@
-import { expect } from 'chai'
+import chai from 'chai'
+import spies from 'chai-spies'
 import bundle from '../src/bundle'
+
+chai.use(spies)
+
+const expect = chai.expect
 
 describe('#bundle()', () => {
   describe('types', () => {
@@ -180,6 +185,20 @@ describe('#bundle()', () => {
 
       expect(resolvers).to.have.deep.property('RootQuery.queryA')
       expect(resolvers).to.have.deep.property('RootQuery.queryB')
+    })
+  })
+
+  describe('alters', () => {
+    it('should allow modules to alter result after bundling', () => {
+      const module = { alter: cnf => ({ cnf, extra: true }) }
+
+      // Set-up spy.
+      chai.spy.on(module, 'alter')
+
+      const config = bundle([module])
+
+      expect(module.alter).to.have.been.called.once
+      expect(config).to.have.property('extra')
     })
   })
 })
