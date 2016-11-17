@@ -235,5 +235,24 @@ describe('bundle', () => {
 
       expect(simplifiedTypeDefs).to.equal('type CustomType { attr: String } type RootQuery { customQuery(arg: String): CustomType } schema { query: RootQuery }')
     })
+
+    it('should be possible to define recursive dependencies (using factories)', () => {
+      const moduleA = () => ({
+        schema: 'type CustomType { attr: String }',
+        modules: [moduleB]
+      })
+
+      const moduleB = {
+        queries: `
+          customQuery(arg: String): CustomType
+        `,
+        modules: [moduleA]
+      }
+
+      const { typeDefs } = bundle([moduleB])
+      const simplifiedTypeDefs = typeDefs.replace(/[\s]+/g, ' ').trim()
+
+      expect(simplifiedTypeDefs).to.equal('type CustomType { attr: String } type RootQuery { customQuery(arg: String): CustomType } schema { query: RootQuery }')
+    })
   })
 })
