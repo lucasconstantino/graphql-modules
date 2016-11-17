@@ -21,7 +21,7 @@ Say you have a system with books and authors. You could have a module to define 
 <details>
  <summary>`/books.js`</summary>
  ```js
- const books = [
+ const data = [
    { id: 1, title: 'JavaScript: The Good Parts', author: 1 },
    { id: 2, title: 'End to end testing with Protractor', author: 2 }
  ]
@@ -38,8 +38,8 @@ Say you have a system with books and authors. You could have a module to define 
    books(): [Book]
    book(id: Int): Book
  `
- const books = () => books
- const book = (root, args) => books.find(book => book.id === args.id)
+ const books = () => data
+ const book = (root, args) => data.find(book => book.id === args.id)
 
  const resolvers = {
    queries: {
@@ -61,25 +61,25 @@ In this file, we define a schema, queries, and resolvers. At the end, we export 
 <details>
  <summary>`/authors.js`</summary>
  ```js
- const authors = [
-   { id: 1, name: 'Douglas Crockford' },
-   { id: 2, name: 'Walmyr Lima' }
+ const data = [
+    { id: 1, name: 'Douglas Crockford' },
+    { id: 2, name: 'Walmyr Lima' }
  ]
 
  const schema = `
-   type Author {
-     id: String
-     name: String
-     books: [Book]
-   }
+    type Author {
+      id: String
+      name: String
+      books: [Book]
+    }
  `
 
  export const queries = `
-   authors(): [Author]
-   author(id: Int): Author
+    authors(): [Author]
+    author(id: Int): Author
  `
- const authors = () => authors
- const author = (root, args) => authors.find(author => author.id === args.id)
+ const authors = () => data
+ const author = (root, args) => data.find(author => author.id === args.id)
 
  const resolvers = {
    queries: {
