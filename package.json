@@ -1,6 +1,6 @@
 {
   "name": "graphql-modules",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "GraphQL module library for Apollo.",
   "main": "index.js",
   "scripts": {

@@ -8,9 +8,6 @@ const defaultOptions = {
   }
 }
 
-// Helper to filter empty values.
-const notEmpty = value => !!value
-
 // Helper to flatten a deeply nested array.
 const flatten = (result, subject) => result.concat(Array.isArray(subject) ? subject.reduce(flatten, []) : subject)
 
@@ -74,11 +71,10 @@ export default (modules = [], options = {}) => {
   options = extend(true, {}, defaultOptions, options)
   modules = modules.reduce((modules, module) => modules.concat(processModule(module)), []).reduce(flatten, [])
 
-  const schema = modules.map(module => module.schema || '').filter(notEmpty).join(`\n`)
-
-  const queries = modules.map(module => module.queries || '').filter(notEmpty).join(`\n`)
-  const mutations = modules.map(module => module.mutations || '').filter(notEmpty).join(`\n`)
-  const subscriptions = modules.map(module => module.subscriptions || '').filter(notEmpty).join(`\n`)
+  const schema = modules.map(module => module.schema || '').filter(Boolean).join(`\n`)
+  const queries = modules.map(module => module.queries || '').filter(Boolean).join(`\n`)
+  const mutations = modules.map(module => module.mutations || '').filter(Boolean).join(`\n`)
+  const subscriptions = modules.map(module => module.subscriptions || '').filter(Boolean).join(`\n`)
 
   const queriesResolvers = Object.assign.apply(null, modules.map(module => module.resolvers && module.resolvers.queries || {}))
   const mutationsResolvers = Object.assign.apply(null, modules.map(module => module.resolvers && module.resolvers.mutations || {}))
