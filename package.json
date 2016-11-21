@@ -1,14 +1,13 @@
 {
   "name": "graphql-modules",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "GraphQL module library for Apollo.",
   "main": "index.js",
   "scripts": {
-    "build": "babel src -d lib",
+    "compile": "babel src -d lib",
     "lint": "eslint index.js src",
     "test": "mocha --require babel-register",
-    "test:watch": "npm test -- --watch",
-    "prepublish": "npm test && npm run lint && npm run build"
+    "prepublish": "npm test && npm run lint && npm run compile"
   },
   "keywords": [
     "graphql",

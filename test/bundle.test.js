@@ -170,6 +170,17 @@ describe('bundle', () => {
       expect(resolvers).to.have.property('RootQuery')
     })
 
+    it('should register field resolvers', () => {
+      const module = {
+        resolvers: {
+          Type: { field: () => null }
+        },
+      }
+      const { resolvers } = bundle([module])
+
+      expect(resolvers).to.have.property('Type')
+    })
+
     it('should register multiple module resolvers', () => {
       const moduleA = {
         queries: 'queryA(arg: String): String',
@@ -255,4 +266,8 @@ describe('bundle', () => {
       expect(simplifiedTypeDefs).to.equal('type CustomType { attr: String } type RootQuery { customQuery(arg: String): CustomType } schema { query: RootQuery }')
     })
   })
+})
+
+describe('execution', () => {
+  it('should have execution tests using makeExecutableSchema')
 })

@@ -79,11 +79,13 @@ export default (modules = [], options = {}) => {
   const queriesResolvers = Object.assign.apply(null, modules.map(module => module.resolvers && module.resolvers.queries || {}))
   const mutationsResolvers = Object.assign.apply(null, modules.map(module => module.resolvers && module.resolvers.mutations || {}))
   const subscriptionsResolvers = Object.assign.apply(null, modules.map(module => module.resolvers && module.resolvers.subscriptions || {}))
+  const fieldResolvers = Object.assign.apply(null, modules.map(({ resolvers: { queries, mutations, subscriptions, ...fieldResolvers } = {} }) => fieldResolvers))
 
   const resolvers = {
     ...(queries ? { RootQuery: queriesResolvers } : {}),
     ...(mutations ? { RootMutation: mutationsResolvers } : {}),
     ...(subscriptions ? { RootSubscription: subscriptionsResolvers } : {}),
+    ...fieldResolvers
   }
 
   const RootQuery = queries.length ? `

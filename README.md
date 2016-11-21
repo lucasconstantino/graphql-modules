@@ -70,9 +70,9 @@ Say you have a system with books and authors - two modules that are interdepende
 <details>
  <summary>`/books.js`</summary>
  ```js
- import authors from './authors'
+ import authors, { data as authorList } from './authors'
 
- const data = [
+ export const data = [
    { id: 1, title: 'JavaScript: The Good Parts', author: 1 },
    { id: 2, title: 'End to end testing with Protractor', author: 2 }
  ]
@@ -96,6 +96,9 @@ Say you have a system with books and authors - two modules that are interdepende
    queries: {
      books,
      book
+   },
+   Book: {
+     author: book => authorList.find(author => author.id === book.author)
    }
  }
 
@@ -113,9 +116,9 @@ In this file, we define a schema, queries, and resolvers. At the end, we export 
 <details>
  <summary>`/authors.js`</summary>
  ```js
- import books from './books'
+ import books, { data as bookList } from './books'
 
- const data = [
+ export const data = [
     { id: 1, name: 'Douglas Crockford' },
     { id: 2, name: 'Walmyr Lima' }
  ]
@@ -139,6 +142,9 @@ In this file, we define a schema, queries, and resolvers. At the end, we export 
    queries: {
      authors,
      author
+   },
+   Author: {
+     books: author => bookList.filter(book => book.author === author.id)
    }
  }
 
