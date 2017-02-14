@@ -197,6 +197,43 @@ describe('bundle', () => {
       expect(resolvers).to.have.deep.property('RootQuery.queryA')
       expect(resolvers).to.have.deep.property('RootQuery.queryB')
     })
+
+    it('should register multiple module and multiple resolvers for one type', () => {
+      const moduleA = {
+        schema: `
+          type ModuleA {
+            id: ID!,
+            moduleB: ModuleB,
+            moduleC: ModuleC
+          }
+        `,
+        queries: 'queryB(arg: String): String',
+        resolvers: { queries: { queryA: () => null } },
+      }
+
+      const moduleB = {
+        schema: `
+          type ModuleB {
+            id: ID!
+          }
+        `,
+        resolvers: { ModuleA: { moduleB: () => null } },
+      }
+
+      const moduleC = {
+        schema: `
+          type ModuleC {
+            id: ID!
+          }
+        `,
+        resolvers: { ModuleA: { moduleC: () => null } },
+      }
+
+      const { resolvers } = bundle([moduleA, moduleB, moduleC])
+
+      expect(resolvers).to.have.deep.property('ModuleA.moduleB')
+      expect(resolvers).to.have.deep.property('ModuleA.moduleC')
+    })
   })
 
   describe('alters', () => {
