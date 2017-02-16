@@ -1,4 +1,4 @@
-import extend from 'extend'
+import deepAssign from 'deep-assign'
 
 const defaultOptions = {
   rootKeys: {
@@ -68,7 +68,7 @@ const processModule = module => {
  * @return {Object} Options as expected by http://dev.apollodata.com/tools/graphql-tools/generate-schema.html#makeExecutableSchema.
  */
 export default (modules = [], options = {}) => {
-  options = extend(true, {}, defaultOptions, options)
+  options = deepAssign({}, defaultOptions, options)
   modules = modules.reduce((modules, module) => modules.concat(processModule(module)), []).reduce(flatten, [])
 
   const schema = modules.map(module => module.schema || '').filter(Boolean).join(`\n`)
@@ -76,10 +76,10 @@ export default (modules = [], options = {}) => {
   const mutations = modules.map(module => module.mutations || '').filter(Boolean).join(`\n`)
   const subscriptions = modules.map(module => module.subscriptions || '').filter(Boolean).join(`\n`)
 
-  const queriesResolvers = Object.assign.apply(null, modules.map(module => module.resolvers && module.resolvers.queries || {}))
-  const mutationsResolvers = Object.assign.apply(null, modules.map(module => module.resolvers && module.resolvers.mutations || {}))
-  const subscriptionsResolvers = Object.assign.apply(null, modules.map(module => module.resolvers && module.resolvers.subscriptions || {}))
-  const fieldResolvers = Object.assign.apply(null, modules.map(({ resolvers: { queries, mutations, subscriptions, ...fieldResolvers } = {} }) => fieldResolvers))
+  const queriesResolvers = deepAssign.apply(null, modules.map(module => module.resolvers && module.resolvers.queries || {}))
+  const mutationsResolvers = deepAssign.apply(null, modules.map(module => module.resolvers && module.resolvers.mutations || {}))
+  const subscriptionsResolvers = deepAssign.apply(null, modules.map(module => module.resolvers && module.resolvers.subscriptions || {}))
+  const fieldResolvers = deepAssign.apply(null, modules.map(({ resolvers: { queries, mutations, subscriptions, ...fieldResolvers } = {} }) => fieldResolvers))
 
   const resolvers = {
     ...(queries ? { RootQuery: queriesResolvers } : {}),
