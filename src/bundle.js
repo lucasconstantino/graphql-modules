@@ -4,6 +4,7 @@ import { set } from 'object-path-immutable'
 import { get } from 'object-path'
 
 const defaultOptions = {
+  combine: true,
   rootKeys: {
     query: 'RootQuery',
     mutation: 'RootMutation',
@@ -41,15 +42,6 @@ const processModule = module => {
 
   return [module].concat(dependencies.map(processModule))
 }
-
-const reduceResolvers = (result, root) => Object.keys(root).reduce(
-  (result, type) => Object.keys(root[type]).reduce(
-    (result, field) => set(result, [type, field], combineResolvers(
-      get(result, [type, field], () => {}),
-      get(root, [type, field])
-    )), result
-  ), result
-)
 
 /**
  * Compiles modules into schema definitions and resolvers as expected by Apollo server.
@@ -91,6 +83,17 @@ export default (modules = [], options = {}) => {
   const queries = modules.map(module => module.queries || '').filter(Boolean).join(`\n`)
   const mutations = modules.map(module => module.mutations || '').filter(Boolean).join(`\n`)
   const subscriptions = modules.map(module => module.subscriptions || '').filter(Boolean).join(`\n`)
+
+  const reduceResolvers = (result, root) => Object.keys(root).reduce(
+    (result, type) => Object.keys(root[type]).reduce(
+      (result, field) => set(result, [type, field], !options.combine || !result[type] || !result[type][field]
+        ? get(root, [type, field])
+        : combineResolvers(
+          get(result, [type, field], () => {}),
+          get(root, [type, field])
+        )), result
+    ), result
+  )
 
   const resolvers = compose(
     modules => modules.map(module => module.resolvers || {}),
