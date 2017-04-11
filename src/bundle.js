@@ -1,4 +1,7 @@
-import deepAssign from 'deep-assign'
+import { combineResolvers } from 'graphql-resolvers'
+import mergeDeep from 'merge-deep'
+import { set } from 'object-path-immutable'
+import { get } from 'object-path'
 
 const defaultOptions = {
   rootKeys: {
@@ -10,6 +13,10 @@ const defaultOptions = {
 
 // Helper to flatten a deeply nested array.
 const flatten = (result, subject) => result.concat(Array.isArray(subject) ? subject.reduce(flatten, []) : subject)
+// Helper to compose functions left-to-right.
+const compose = (...fns) => x => fns.reduce((v, f) => f(v), x)
+// Helper to rename an object's property.
+const renameProp = (from, to) => ({ [from]: value, ...rest }) => Object.assign(rest, value ? { [to]: value } : {})
 
 const processedModules = []
 
@@ -34,6 +41,15 @@ const processModule = module => {
 
   return [module].concat(dependencies.map(processModule))
 }
+
+const reduceResolvers = (result, root) => Object.keys(root).reduce(
+  (result, type) => Object.keys(root[type]).reduce(
+    (result, field) => set(result, [type, field], combineResolvers(
+      get(result, [type, field], () => {}),
+      get(root, [type, field])
+    )), result
+  ), result
+)
 
 /**
  * Compiles modules into schema definitions and resolvers as expected by Apollo server.
@@ -68,7 +84,7 @@ const processModule = module => {
  * @return {Object} Options as expected by http://dev.apollodata.com/tools/graphql-tools/generate-schema.html#makeExecutableSchema.
  */
 export default (modules = [], options = {}) => {
-  options = deepAssign({}, defaultOptions, options)
+  options = mergeDeep({}, defaultOptions, options)
   modules = modules.reduce((modules, module) => modules.concat(processModule(module)), []).reduce(flatten, [])
 
   const schema = modules.map(module => module.schema || '').filter(Boolean).join(`\n`)
@@ -76,17 +92,13 @@ export default (modules = [], options = {}) => {
   const mutations = modules.map(module => module.mutations || '').filter(Boolean).join(`\n`)
   const subscriptions = modules.map(module => module.subscriptions || '').filter(Boolean).join(`\n`)
 
-  const queriesResolvers = deepAssign.apply(null, modules.map(module => module.resolvers && module.resolvers.queries || {}))
-  const mutationsResolvers = deepAssign.apply(null, modules.map(module => module.resolvers && module.resolvers.mutations || {}))
-  const subscriptionsResolvers = deepAssign.apply(null, modules.map(module => module.resolvers && module.resolvers.subscriptions || {}))
-  const fieldResolvers = deepAssign.apply(null, modules.map(({ resolvers: { queries, mutations, subscriptions, ...fieldResolvers } = {} }) => fieldResolvers))
-
-  const resolvers = {
-    ...(queries ? { RootQuery: queriesResolvers } : {}),
-    ...(mutations ? { RootMutation: mutationsResolvers } : {}),
-    ...(subscriptions ? { RootSubscription: subscriptionsResolvers } : {}),
-    ...fieldResolvers
-  }
+  const resolvers = compose(
+    modules => modules.map(module => module.resolvers || {}),
+    modules => modules.reduce(reduceResolvers, {}),
+    renameProp('subscriptions', options.rootKeys.subscription),
+    renameProp('mutations', options.rootKeys.mutation),
+    renameProp('queries', options.rootKeys.query),
+  )(modules)
 
   const RootQuery = queries.length ? `
     type ${options.rootKeys.query} {
@@ -124,6 +136,9 @@ export default (modules = [], options = {}) => {
   // logger,
   // allowUndefinedInResolve = false,
   // resolverValidationOptions = {},
+
+  // Cleanup processedModules after bundling.
+  processedModules.splice(0, processedModules.length)
 
   const config = { typeDefs, resolvers }
 
