@@ -67,8 +67,8 @@ This library handles complex situations such as cyclic dependencies between modu
 
 Say you have a system with books and authors - two modules that are interdependent; books have authors and authors have books. You could end up with something like this:
 
-<details>
- <summary>`/books.js`</summary>
+
+#### /books.js
  ```js
  import authors, { data as authorList } from './authors'
 
@@ -109,12 +109,12 @@ Say you have a system with books and authors - two modules that are interdepende
    modules: [authors]
  })
  ```
-</details>
+
 
 In this file, we define a schema, queries, and resolvers. At the end, we export those assets in a single object - the module.
 
-<details>
- <summary>`/authors.js`</summary>
+
+#### /authors.js
  ```js
  import books, { data as bookList } from './books'
 
@@ -155,12 +155,10 @@ In this file, we define a schema, queries, and resolvers. At the end, we export 
    modules: [books]
  })
  ```
-</details>
 
 This file is almost copy and paste from the previous.
 
-<details>
- <summary>`/schema.js`</summary>
+#### /schema.js
  ```js
  import { bundle } from 'graphql-modules'
  import { makeExecutableSchema } from 'graphql-tools'
@@ -171,7 +169,7 @@ This file is almost copy and paste from the previous.
 
  export default makeExecutableSchema(bundle(modules))
  ```
-</details>
+
 
 At this last file, we create our schema (for this example, we are using [graphql-tools](https://github.com/apollostack/graphql-tools)'s `makeExecutableSchema`).
 
