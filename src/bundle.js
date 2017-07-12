@@ -1,5 +1,5 @@
 import { combineResolvers } from 'graphql-resolvers'
-import mergeDeep from 'merge-deep'
+import assignDeep from 'assign-deep'
 import { set } from 'object-path-immutable'
 import { get } from 'object-path'
 
@@ -76,7 +76,7 @@ const processModule = module => {
  * @return {Object} Options as expected by http://dev.apollodata.com/tools/graphql-tools/generate-schema.html#makeExecutableSchema.
  */
 export default (modules = [], options = {}) => {
-  options = mergeDeep({}, defaultOptions, options)
+  options = assignDeep({}, defaultOptions, options)
   modules = modules.reduce((modules, module) => modules.concat(processModule(module)), []).reduce(flatten, [])
 
   const schema = modules.map(module => module.schema || '').filter(Boolean).join(`\n`)
