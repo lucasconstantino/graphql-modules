@@ -31,8 +31,8 @@
     "mocha": "^3.1.2"
   },
   "dependencies": {
+    "assign-deep": "^0.4.5",
     "graphql-resolvers": "^0.0.2",
-    "merge-deep": "^3.0.0",
     "object-path": "^0.11.4",
     "object-path-immutable": "^0.5.1"
   },
