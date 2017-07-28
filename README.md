@@ -86,7 +86,7 @@ Say you have a system with books and authors - two modules that are interdepende
  `
 
  export const queries = `
-   books(): [Book]
+   books: [Book]
    book(id: Int): Book
  `
  const books = () => data
@@ -102,7 +102,7 @@ Say you have a system with books and authors - two modules that are interdepende
    }
  }
 
- export default = () => ({
+ export default () => ({
    schema,
    queries,
    resolvers,
@@ -132,7 +132,7 @@ In this file, we define a schema, queries, and resolvers. At the end, we export 
  `
 
  export const queries = `
-    authors(): [Author]
+    authors: [Author]
     author(id: Int): Author
  `
  const authors = () => data
