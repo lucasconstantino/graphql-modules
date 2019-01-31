@@ -1,8 +1,14 @@
-# GraphQL Modules
+# DEPRECATED
+
+> :warning: This project is no longer maintained. We recommend you use [Urigo/graphql-modules](https://github.com/Urigo/graphql-modules) instead.
+
+---
+
+## GraphQL Modules
 
 A library to simplify modularization of [Apollo server](http://dev.apollodata.com/tools/graphql-server/index.html) applications.
 
-![Build status](https://travis-ci.org/lucasconstantino/graphql-modules.svg?branch=master)
+[![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/) ![Build status](https://travis-ci.org/lucasconstantino/graphql-modules.svg?branch=master)
 
 ## Installation
 
