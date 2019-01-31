@@ -1,6 +1,6 @@
 # DEPRECATED
 
-> :warning: This project is no longer maintained. We recommend you use [Urigo/graphql-modules](https://github.com/Urigo/graphql-modules) instead.
+:warning: _This project is no longer maintained. We recommend you use [Urigo/graphql-modules](https://github.com/Urigo/graphql-modules) instead._
 
 ---
 
